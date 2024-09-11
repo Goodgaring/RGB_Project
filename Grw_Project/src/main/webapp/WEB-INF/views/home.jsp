@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-
+<%@ page import="com.rgb.grw.dto.UserInfoDto"%>
 <!DOCTYPE html>
 <html>
 <%@include file="./header.jsp"%>
@@ -11,101 +11,111 @@
 <script src="./assets/plugins/custom/fullcalendar/ko.global.js"></script>
 <script src="./js/home.js"></script>
 
+<%-- 관리자 권한 체크 --%>
+<%
+boolean isAdmin = (loginDto != null && "인사관리자".equals(loginDto.getAuth_name()));
+%>
 <body>
 	<div style="padding-left:80px; margin-top:10px;" id="kt_app_content" class="app-content flex-column-fluid">
 		<div style="padding-left:80px;" id="kt_app_content_container" class="app-container container-xxl">
 
 			<!-- 인사부분 위젯추가 -->
 			<div class="card card-flush h-xl-100">
-				<!-- HEAD -->
-				<div
-					class="card-header rounded bgi-no-repeat bgi-size-cover bgi-position-y-top bgi-position-x-center align-items-start h-250px"
-					style="background-image: url('./assets/media/svg/shapes/top-green.png');"
-					data-bs-theme="light">
-					<div
-						class="card-title align-items-start flex-column text-white pt-15">
-						<span class="fw-bold fs-2x mb-3">0 달의 근태현황</span>
-						<span class="fw-bold fs-1x mb-3">000님의 근태현황</span>
-						<div class="fs-4 text-white">
-						</div>
-					</div>
-					<div class="menu-content px-2 py-6">
-									<a class="btn btn-primary btn-sm px-4" href="./empAttendanceList.do">근태 리스트</a>
-					</div>
-					<!-- HEAD -->
-				</div>
-				<div class="card-body mt-n20">
-					<div class="mt-n20 position-relative">
-						<div class="row g-3 g-lg-6">
-							<div style="flex: 0 0 auto; width: 25%;">
-								<div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5">
-									<div class="symbol symbol-30px me-5 mb-8">
-										<span class="symbol-label"> <i
-											class="ki-duotone ki-timer fs-1 text-primary"> <span
-												class="path1"></span> <span class="path2"></span>
-										</i>
-										</span>
-									</div>
-									<div class="m-0">
-										<span
-											class="text-gray-700 fw-bolder d-block fs-2qx lh-1 ls-n1 mb-1">0</span>
-										<span class="text-gray-500 fw-semibold fs-6">출근</span>
-									</div>
-								</div>
-							</div>
-							<div style="flex: 0 0 auto; width: 25%;">
-								<div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5">
-									<div class="symbol symbol-30px me-5 mb-8">
-										<span class="symbol-label"> <i
-											class="ki-duotone ki-timer fs-1 text-primary"> <span
-												class="path1"></span> <span class="path2"></span>
-										</i>
-										</span>
-									</div>
-									<div class="m-0">
-										<span
-											class="text-gray-700 fw-bolder d-block fs-2qx lh-1 ls-n1 mb-1">0</span>
-										<span class="text-gray-500 fw-semibold fs-6">지각</span>
-									</div>
-								</div>
-							</div>
-							<div style="flex: 0 0 auto; width: 25%;">
-								<div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5">
-									<div class="symbol symbol-30px me-5 mb-8">
-										<span class="symbol-label"> <i
-											class="ki-duotone ki-timer fs-1 text-primary"> <span
-												class="path1"></span> <span class="path2"></span> <span
-												class="path3"></span>
-										</i>
-										</span>
-									</div>
-									<div class="m-0">
-										<span
-											class="text-gray-700 fw-bolder d-block fs-2qx lh-1 ls-n1 mb-1">0</span>
-										<span class="text-gray-500 fw-semibold fs-6">조퇴</span>
-									</div>
-								</div>
-							</div>
-							<div style="flex: 0 0 auto; width: 25%;">
-								<div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5">
-									<div class="symbol symbol-30px me-5 mb-8">
-										<span class="symbol-label"> <i
-											class="ki-duotone ki-timer fs-1 text-primary"> <span
-												class="path1"></span> <span class="path2"></span> <span
-												class="path3"></span>
-										</i>
-										</span>
-									</div>
-									<div class="m-0">
-										<span
-											class="text-gray-700 fw-bolder d-block fs-2qx lh-1 ls-n1 mb-1">0</span>
-										<span class="text-gray-500 fw-semibold fs-6">결근</span>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+			    <!-- HEAD -->
+			    <div class="card-header rounded bgi-no-repeat bgi-size-cover bgi-position-y-top bgi-position-x-center align-items-start h-250px"
+			        style="background-image: url('./assets/media/svg/shapes/top-green.png');"
+			        data-bs-theme="light">
+			        <div class="card-title align-items-start flex-column text-white pt-15">
+			            <!-- 현재 달과 사용자 이름을 표시 -->
+			            <span class="fw-bold fs-2x mb-3">${currentMonth} 월의 근태현황</span>
+			            <span class="fw-bold fs-1x mb-3">${loginDto.emp_name}님의 근태현황</span>
+			            <div class="fs-4 text-white"></div>
+			        </div>
+			        <div class="menu-content px-2 py-6">
+			            <%-- 관리자일 때만 "근태 리스트" 버튼 표시 --%>
+						<% if (isAdmin) { %>
+						    <a class="btn btn-danger btn-sm px-4" href="./empAttendanceList.do">관리자 근태 리스트</a>
+						<% } %>
+			            <a class="btn btn-primary btn-sm px-4" href="./myAttendanceList.do">근태 리스트</a>
+			            <!-- 출근/퇴근 버튼 추가 -->
+						<button id="attendanceButton" class="btn btn-primary btn-sm px-4" onclick="toggleAttendance()">
+						    출근
+						</button>
+						<!-- empNo를 입력받기 위한 방법 추가 -->
+						<input type="hidden" id="empNo" value="${loginDto.emp_no}">
+			
+			        </div>
+			    </div>
+			    <!-- HEAD 끝 -->
+			    <div class="card-body mt-n20">
+			        <div class="mt-n20 position-relative">
+			            <div class="row g-3 g-lg-6">
+			                <!-- 출근 -->
+			                <div style="flex: 0 0 auto; width: 25%;">
+			                    <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5">
+			                        <div class="symbol symbol-30px me-5 mb-8">
+			                            <span class="symbol-label"> <i class="ki-duotone ki-timer fs-1 text-primary"> 
+			                                <span class="path1"></span> <span class="path2"></span>
+			                            </i></span>
+			                        </div>
+			                        <div class="m-0">
+			                            <!-- 정상 출근 횟수 -->
+			                            <span class="text-gray-700 fw-bolder d-block fs-2qx lh-1 ls-n1 mb-1">${normalCount}</span>
+			                            <span class="text-gray-500 fw-semibold fs-6">출근</span>
+			                        </div>
+			                    </div>
+			                </div>
+			
+			                <!-- 지각 -->
+			                <div style="flex: 0 0 auto; width: 25%;">
+			                    <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5">
+			                        <div class="symbol symbol-30px me-5 mb-8">
+			                            <span class="symbol-label"> <i class="ki-duotone ki-timer fs-1 text-primary">
+			                                <span class="path1"></span> <span class="path2"></span>
+			                            </i></span>
+			                        </div>
+			                        <div class="m-0">
+			                            <!-- 지각 횟수 -->
+			                            <span class="text-gray-700 fw-bolder d-block fs-2qx lh-1 ls-n1 mb-1">${lateCount}</span>
+			                            <span class="text-gray-500 fw-semibold fs-6">지각</span>
+			                        </div>
+			                    </div>
+			                </div>
+			
+			                <!-- 조퇴 -->
+			                <div style="flex: 0 0 auto; width: 25%;">
+			                    <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5">
+			                        <div class="symbol symbol-30px me-5 mb-8">
+			                            <span class="symbol-label"> <i class="ki-duotone ki-timer fs-1 text-primary">
+			                                <span class="path1"></span> <span class="path2"></span> <span class="path3"></span>
+			                            </i></span>
+			                        </div>
+			                        <div class="m-0">
+			                            <!-- 조퇴 횟수 -->
+			                            <span class="text-gray-700 fw-bolder d-block fs-2qx lh-1 ls-n1 mb-1">${earlyLeaveCount}</span>
+			                            <span class="text-gray-500 fw-semibold fs-6">조퇴</span>
+			                        </div>
+			                    </div>
+			                </div>
+			
+			                <!-- 결근 -->
+			                <div style="flex: 0 0 auto; width: 25%;">
+			                    <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5">
+			                        <div class="symbol symbol-30px me-5 mb-8">
+			                            <span class="symbol-label"> <i class="ki-duotone ki-timer fs-1 text-primary">
+			                                <span class="path1"></span> <span class="path2"></span> <span class="path3"></span>
+			                            </i></span>
+			                        </div>
+			                        <div class="m-0">
+			                            <!-- 결근 횟수 -->
+			                            <span class="text-gray-700 fw-bolder d-block fs-2qx lh-1 ls-n1 mb-1">${absentCount}</span>
+			                            <span class="text-gray-500 fw-semibold fs-6">결근</span>
+			                        </div>
+			                    </div>
+			                </div>
+			            </div>
+			        </div>
+			    </div>
 			</div>
 			<!-- 인사부분 위젯 끝 -->
 

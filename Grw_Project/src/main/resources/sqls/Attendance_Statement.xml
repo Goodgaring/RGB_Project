@@ -1,95 +1,137 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.rgb.grw.dao.AttendanceDaoImpl">
+<mapper namespace="com.rgb.grw.dao.IAttendanceDao">
 
 	<!-- 출근 기록을 추가 -->
 	<insert id="insertAttendance" parameterType="AttendanceDto">
 		INSERT INTO
-		ATTENDANCE (ATT_NO, EMP_NO, ATT_INTIME, ATT_OUTTIME,
-		ATT_WORKTIME,
-		ATT_BASETIME, ATT_STATUS, ATT_LATE)
-		VALUES (#{att_no,
-		jdbcType=VARCHAR}, #{emp_no, jdbcType=VARCHAR}, #{att_intime,
-		jdbcType=TIMESTAMP}, #{att_outtime, jdbcType=TIMESTAMP},
-		#{att_worktime, jdbcType=INTEGER}, #{att_basetime, jdbcType=INTEGER},
-		#{att_status, jdbcType=VARCHAR}, #{att_late, jdbcType=VARCHAR})
+		ATTENDANCE (
+		EMP_NO, ATT_INTIME, ATT_OUTTIME,
+		ATT_WORKTIME, ATT_BASETIME
+		) VALUES (
+		#{emp_no, jdbcType=VARCHAR}, #{att_intime,
+		jdbcType=TIMESTAMP}, #{att_outtime,
+		jdbcType=TIMESTAMP},
+		#{att_worktime, jdbcType=INTEGER}, #{att_basetime, jdbcType=INTEGER}
+		)
 	</insert>
 
-	<!-- 출근 기록을 업데이트 -->
+	<!-- 출근 기록 업데이트 -->
 	<update id="updateAttendance" parameterType="AttendanceDto">
-		UPDATE ATTENDANCE
-		SET ATT_OUTTIME = #{att_outtime, jdbcType=TIMESTAMP},
-		ATT_WORKTIME =
-		#{att_worktime, jdbcType=INTEGER},
-		ATT_STATUS = #{att_status,
-		jdbcType=VARCHAR},
-		ATT_LATE = #{att_late, jdbcType=VARCHAR}
-		WHERE ATT_NO
-		= #{att_no, jdbcType=VARCHAR}
+		<![CDATA[
+    UPDATE ATTENDANCE
+SET 
+    ATT_OUTTIME = TO_TIMESTAMP(#{att_outtime, jdbcType=TIMESTAMP}),
+    ATT_WORKTIME = ROUND((CAST(#{att_outtime, jdbcType=TIMESTAMP} AS DATE) - CAST(ATT_INTIME AS DATE)) * 24 * 60),
+    ATT_STATUS = CASE
+        WHEN #{att_outtime, jdbcType=TIMESTAMP} IS NULL THEN '출근'
+        WHEN #{att_outtime, jdbcType=TIMESTAMP} IS NOT NULL AND ATT_WORKTIME < 480 THEN '조퇴'
+        WHEN #{att_outtime, jdbcType=TIMESTAMP} IS NOT NULL AND ATT_WORKTIME = 480 
+            AND CAST(ATT_INTIME AS DATE) <= TRUNC(SYSDATE) + INTERVAL '09:00:00' HOUR TO SECOND 
+            AND CAST(#{att_outtime, jdbcType=TIMESTAMP} AS DATE) >= TRUNC(SYSDATE) + INTERVAL '16:00:00' HOUR TO SECOND THEN '정상'
+        ELSE '결근'
+    END,
+    ATT_LATE = CASE
+        WHEN #{att_outtime, jdbcType=TIMESTAMP} IS NULL THEN NULL
+        WHEN CAST(ATT_INTIME AS DATE) > TRUNC(SYSDATE) + INTERVAL '09:00:00' HOUR TO SECOND THEN ROUND((SYSDATE - ATT_INTIME) * 24 * 60)
+        ELSE NULL
+    END
+WHERE EMP_NO = #{emp_no,
+		jdbcType=VARCHAR}
+AND ATT_INTIME = (
+    SELECT MIN(ATT_INTIME)
+    FROM ATTENDANCE
+    WHERE EMP_NO = #{emp_no,
+		jdbcType=VARCHAR}
+    AND TRUNC(ATT_INTIME) = TRUNC(SYSDATE)
+)
+    ]]>
 	</update>
+
 
 	<!-- 특정 사원의 최신 출근 기록을 조회 -->
 	<select id="selectLatestAttendanceByEmpNo"
 		parameterType="java.lang.String" resultType="AttendanceDto">
-		SELECT * FROM ATTENDANCE
-		WHERE EMP_NO = #{emp_no, jdbcType=VARCHAR}
-		ORDER BY ATT_NO DESC
-		FETCH
-		FIRST 1 ROWS ONLY
+		SELECT EMP_NO, ATT_INTIME,
+		ATT_OUTTIME, ATT_WORKTIME,
+		ATT_BASETIME, ATT_LATE, ATT_STATUS
+		FROM
+		ATTENDANCE
+		WHERE EMP_NO =
+		#{emp_no,
+		jdbcType=VARCHAR}
+		AND ATT_INTIME =
+		CURRENT_DATE
+		ORDER BY
+		ATT_INTIME DESC
+		FETCH FIRST 1 ROWS ONLY
 	</select>
 
-	<!-- 특정 날짜의 출근 기록을 조회 -->
-	<select id="selectAttendanceForDay"
-		parameterType="java.util.Map" resultType="AttendanceDto">
-		SELECT * FROM ATTENDANCE
-		WHERE EMP_NO = #{emp_no, jdbcType=VARCHAR}
-		AND TRUNC(ATT_INTIME) =
-		TRUNC(#{date, jdbcType=DATE})
-	</select>
-
-	<!-- 오늘의 출근 기록을 조회 -->
+	<!-- 오늘의 출근 기록을 조회 (하나의 결과만 가져오기) -->
 	<select id="selectTodayAttendanceByEmpNo"
 		parameterType="java.lang.String" resultType="AttendanceDto">
-		SELECT * FROM ATTENDANCE
-		WHERE EMP_NO = #{emp_no, jdbcType=VARCHAR}
-		AND TRUNC(ATT_INTIME) =
-		TRUNC(SYSDATE)
+		SELECT EMP_NO, ATT_INTIME,
+		ATT_OUTTIME, ATT_WORKTIME, ATT_BASETIME,
+		ATT_LATE, ATT_STATUS
+		FROM (
+		SELECT EMP_NO, ATT_INTIME, ATT_OUTTIME, ATT_WORKTIME, ATT_BASETIME,
+		ATT_LATE, ATT_STATUS
+		FROM ATTENDANCE
+		WHERE EMP_NO = #{emp_no,
+		jdbcType=VARCHAR}
+		AND TRUNC(ATT_INTIME) = TRUNC(SYSDATE)
+		ORDER BY
+		ATT_INTIME DESC
+		)
+		WHERE ROWNUM = 1
 	</select>
 
 	<!-- 오늘의 출근 상태를 조회 -->
 	<select id="selectTodayAttendanceStatusByEmpNo"
 		parameterType="java.lang.String" resultType="java.util.Map">
-		SELECT
-		CASE
-		WHEN ATT_OUTTIME
-		IS NULL THEN '출근'
-		WHEN ATT_OUTTIME IS NOT NULL AND ATT_INTIME &lt;
-		SYSDATE - INTERVAL '1' HOUR THEN '지각'
-		WHEN ATT_OUTTIME IS NOT NULL AND
-		ATT_OUTTIME &gt; SYSDATE + INTERVAL '1' HOUR THEN '조퇴'
+		SELECT CASE
+		WHEN ATT_OUTTIME IS NULL THEN '출근'
+		WHEN ATT_OUTTIME IS NOT
+		NULL AND <![CDATA[ATT_INTIME < SYSDATE - INTERVAL '9' HOUR]]>
+		THEN '지각'
+		WHEN ATT_OUTTIME IS NOT NULL AND <![CDATA[ATT_OUTTIME >= SYSDATE + INTERVAL '17' HOUR]]>
+		THEN '조퇴'
 		ELSE '정상'
-		END AS
-		STATUS
+		END AS STATUS
 		FROM ATTENDANCE
-		WHERE EMP_NO = #{emp_no, jdbcType=VARCHAR}
-		AND
-		TRUNC(ATT_INTIME) = TRUNC(SYSDATE)
+		WHERE EMP_NO = #{emp_no,
+		jdbcType=VARCHAR}
+		AND TRUNC(ATT_INTIME) = TRUNC(SYSDATE)
 	</select>
 
 	<!-- 특정 사원의 월별 출근 기록을 조회 -->
 	<select id="selectMonthlyAttendanceByEmpNo"
 		parameterType="java.util.Map" resultType="AttendanceDto">
-		SELECT * FROM ATTENDANCE
-		WHERE EMP_NO = #{emp_no, jdbcType=VARCHAR}
-		AND TRUNC(ATT_INTIME, 'MM')
-		= TRUNC(#{date, jdbcType=DATE}, 'MM')
+		SELECT a.EMP_NO, e.EMP_NAME,
+		a.ATT_INTIME, a.ATT_OUTTIME, a.ATT_WORKTIME,
+		a.ATT_BASETIME,
+		a.ATT_LATE, a.ATT_STATUS
+		FROM ATTENDANCE a
+		JOIN EMP e ON a.EMP_NO =
+		e.EMP_NO
+		WHERE a.EMP_NO = #{emp_no, jdbcType=VARCHAR}
+		AND
+		(TRUNC(a.ATT_INTIME, 'MM') = TRUNC(#{date, jdbcType=DATE}, 'MM') OR
+		a.ATT_INTIME IS NULL)
 	</select>
 
 	<!-- 특정 날짜의 모든 사원들의 출근 기록을 조회 -->
 	<select id="selectAllAttendanceForDay"
 		parameterType="java.util.Date" resultType="AttendanceDto">
-		SELECT * FROM ATTENDANCE
-		WHERE TRUNC(ATT_INTIME) = TRUNC(#{date, jdbcType=DATE})
+		SELECT EMP_NO, ATT_INTIME,
+		ATT_OUTTIME, ATT_WORKTIME,
+		ATT_BASETIME, ATT_LATE, ATT_STATUS
+		FROM
+		ATTENDANCE
+		WHERE
+		TRUNC(ATT_INTIME) =
+		TRUNC(#{date, jdbcType=DATE}) AND
+		ATT_INTIME IS NOT NULL
 	</select>
 
 </mapper>

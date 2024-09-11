@@ -9,26 +9,26 @@ import java.util.Map;
 public interface IAttendanceDao {
 
 	// 출근 기록을 추가
-	public int insertAttendance(AttendanceDto attendanceDto);
+	int insertAttendance(AttendanceDto attendanceDto);
 
 	// 출근 기록을 업데이트
-	public int updateAttendance(AttendanceDto attendanceDto);
+	int updateAttendance(AttendanceDto attendanceDto);
 
 	// 특정 사원의 최신 출근 기록을 조회
-	public AttendanceDto selectLatestAttendanceByEmpNo(String empNo);
-
-	// 특정 날짜의 출근 기록을 조회
-	public List<AttendanceDto> selectAttendanceForDay(@Param("empNo") String empNo, @Param("date") Date date);
+	AttendanceDto selectLatestAttendanceByEmpNo(String emp_no);
 
 	// 오늘의 출근 기록을 조회
-	public AttendanceDto selectTodayAttendanceByEmpNo(String empNo);
+	AttendanceDto selectTodayAttendanceByEmpNo(String emp_no);
 
 	// 오늘의 출근 상태를 조회
-	public Map<String, String> selectTodayAttendanceStatusByEmpNo(String empNo);
+	Map<String, String> selectTodayAttendanceStatusByEmpNo(String emp_no);
 
 	// 특정 사원의 월별 출근 기록을 조회
-	public List<AttendanceDto> selectMonthlyAttendanceByEmpNo(@Param("empNo") String empNo, @Param("date") Date date);
+	List<AttendanceDto> selectMonthlyAttendanceByEmpNo(@Param("emp_no") String emp_no, @Param("date") Date date);
 
 	// 특정 날짜의 모든 사원들의 출근 기록을 조회
-	public List<AttendanceDto> selectAllAttendanceForDay(Date date);
+	List<AttendanceDto> selectAllAttendanceForDay(Date date);
+
+	// 특정 날짜의 출근 기록을 조회
+	List<AttendanceDto> selectAttendanceForDay(@Param("emp_no") String emp_no, @Param("date") Date date);
 }

@@ -59,6 +59,7 @@ public class AttendanceServiceImpl implements IAttendanceService {
 	public List<AttendanceDto> selectMonthlyAttendanceByEmpNo(String empNo, Date date) {
 		log.info("AttendanceServiceImpl 월별 출근 기록 조회: {} {}", empNo, date);
 		return dao.selectMonthlyAttendanceByEmpNo(empNo, date);
+
 	}
 
 	@Override

@@ -27,10 +27,10 @@
     </div>
     <div class="d-flex align-items-center">
         <form action="empAttendanceList.do" method="get" class="d-flex align-items-center">
-		    <label for="date" class="me-2 mb-0">선택한 날짜:</label>
-		    <input type="date" id="date" name="date" class="form-control form-control-solid me-2" placeholder="날짜를 선택하세요">
-		    <button type="submit" class="btn btn-primary" style="width: 100px;">조회</button>
-		</form>
+            <label for="month" class="me-2 mb-0"></label>
+            <input type="month" id="month" name="month" class="form-control form-control-solid me-2" placeholder="월을 선택하세요">
+            <button type="submit" class="btn btn-primary" style="width: 100px;">조회</button>
+        </form>
     </div>
 </div>
 
@@ -82,7 +82,7 @@
 									</tr>
 								</thead>
 								<tbody class="text-gray-600 fw-semibold">
-									<c:forEach var="dailyAttendance" items="${dailyAttendance}">
+									<c:forEach var="attendance" items="${monthlyAttendance}">
 										<tr>
 											<td>
 												<div
@@ -90,29 +90,29 @@
 													<input class="form-check-input" type="checkbox" value="1">
 												</div>
 											</td>
-											<td>${dailyAttendance.emp_no}</td>
-											<td>${dailyAttendance.emp_name}</td>
+											<td>${attendance.emp_no}</td>
+											<td>${attendance.emp_name}</td>
 											<td>
 											    <c:choose>
-											        <c:when test="${dailyAttendance.att_intime != null}">
-											            <fmt:formatDate value="${dailyAttendance.att_intime}" pattern="MM월 dd일 HH시 mm분" />
+											        <c:when test="${attendance.att_intime != null}">
+											            <fmt:formatDate value="${attendance.att_intime}" pattern="MM월 dd일 HH시 mm분" />
 											        </c:when>
 											        <c:otherwise>-</c:otherwise>
 											    </c:choose>
 											</td>
 											<td>
 											    <c:choose>
-											        <c:when test="${dailyAttendance.att_outtime != null}">
-											            <fmt:formatDate value="${dailyAttendance.att_outtime}" pattern="MM월 dd일 HH시 mm분" />
+											        <c:when test="${attendance.att_outtime != null}">
+											            <fmt:formatDate value="${attendance.att_outtime}" pattern="MM월 dd일 HH시 mm분" />
 											        </c:when>
 											        <c:otherwise>-</c:otherwise>
 											    </c:choose>
 											</td>
 											<td>
 											    <c:choose>
-											        <c:when test="${dailyAttendance.att_worktime != null}">
-											            <c:set var="hours" value="${dailyAttendance.att_worktime / 60}" />
-											            <c:set var="minutes" value="${dailyAttendance.att_worktime % 60}" />
+											        <c:when test="${attendance.att_worktime != null}">
+											            <c:set var="hours" value="${attendance.att_worktime / 60}" />
+											            <c:set var="minutes" value="${attendance.att_worktime % 60}" />
 											            ${hours}시간 ${minutes}분
 											        </c:when>
 											        <c:otherwise>-</c:otherwise>
@@ -120,13 +120,13 @@
 											</td>
 											<td>
 											    <c:choose>
-											        <c:when test="${dailyAttendance.att_intime == null && dailyAttendance.att_outtime == null}">
+											        <c:when test="${attendance.att_intime == null && attendance.att_outtime == null}">
 											            결근
 											        </c:when>
-											        <c:when test="${dailyAttendance.att_outtime == null}">
+											        <c:when test="${attendance.att_outtime == null}">
 											            비정상
 											        </c:when>
-											        <c:otherwise>${dailyAttendance.att_status}</c:otherwise>
+											        <c:otherwise>${attendance.att_status}</c:otherwise>
 											    </c:choose>
 											</td>
 										</tr>

@@ -19,6 +19,7 @@ public class AttendanceDto {
 
 	private String att_no; // 근태번호
 	private String emp_no; // 사원번호
+	private String emp_name; // 사원이름
 	private Date att_intime; // 출근시간
 	private Date att_outtime; // 퇴근시간
 	private int att_worktime; // 근무시간 (분 단위)

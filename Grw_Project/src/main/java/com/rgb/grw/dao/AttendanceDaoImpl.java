@@ -19,7 +19,7 @@ public class AttendanceDaoImpl implements IAttendanceDao {
 	@Autowired
 	private SqlSession session;
 
-	private final String NS = "com.rgb.grw.dao.AttendanceDaoImpl.";
+	private final String NS = "com.rgb.grw.dao.IAttendanceDao.";
 
 	@Override
 	public int insertAttendance(AttendanceDto attendanceDto) {
@@ -34,34 +34,34 @@ public class AttendanceDaoImpl implements IAttendanceDao {
 	}
 
 	@Override
-	public AttendanceDto selectLatestAttendanceByEmpNo(String empNo) {
-		log.info("AttendanceDaoImpl 최신 출근 기록 조회: " + empNo);
-		return session.selectOne(NS + "selectLatestAttendanceByEmpNo", empNo);
+	public AttendanceDto selectLatestAttendanceByEmpNo(String emp_no) {
+		log.info("AttendanceDaoImpl 최신 출근 기록 조회: " + emp_no);
+		return session.selectOne(NS + "selectLatestAttendanceByEmpNo", emp_no);
 	}
 
 	@Override
-	public List<AttendanceDto> selectAttendanceForDay(String empNo, Date date) {
-		log.info("AttendanceDaoImpl 특정 날짜 출근 기록 조회: " + empNo + ", " + date);
-		Map<String, Object> params = Map.of("empNo", empNo, "date", date);
+	public List<AttendanceDto> selectAttendanceForDay(String emp_no, Date date) {
+		log.info("AttendanceDaoImpl 특정 날짜 출근 기록 조회: " + emp_no + ", " + date);
+		Map<String, Object> params = Map.of("emp_no", emp_no, "date", date);
 		return session.selectList(NS + "selectAttendanceForDay", params);
 	}
 
 	@Override
-	public AttendanceDto selectTodayAttendanceByEmpNo(String empNo) {
-		log.info("AttendanceDaoImpl 오늘의 출근 기록 조회: " + empNo);
-		return session.selectOne(NS + "selectTodayAttendanceByEmpNo", empNo);
+	public AttendanceDto selectTodayAttendanceByEmpNo(String emp_no) {
+		log.info("AttendanceDaoImpl 오늘의 출근 기록 조회: " + emp_no);
+		return session.selectOne(NS + "selectTodayAttendanceByEmpNo", emp_no);
 	}
 
 	@Override
-	public Map<String, String> selectTodayAttendanceStatusByEmpNo(String empNo) {
-		log.info("AttendanceDaoImpl 오늘의 출근 상태 조회: " + empNo);
-		return session.selectOne(NS + "selectTodayAttendanceStatusByEmpNo", empNo);
+	public Map<String, String> selectTodayAttendanceStatusByEmpNo(String emp_no) {
+		log.info("AttendanceDaoImpl 오늘의 출근 상태 조회: " + emp_no);
+		return session.selectOne(NS + "selectTodayAttendanceStatusByEmpNo", emp_no);
 	}
 
 	@Override
-	public List<AttendanceDto> selectMonthlyAttendanceByEmpNo(String empNo, Date date) {
-		log.info("AttendanceDaoImpl 월별 출근 기록 조회: " + empNo + ", " + date);
-		Map<String, Object> params = Map.of("empNo", empNo, "date", date);
+	public List<AttendanceDto> selectMonthlyAttendanceByEmpNo(String emp_no, Date date) {
+		log.info("AttendanceDaoImpl 월별 출근 기록 조회: " + emp_no + ", " + date);
+		Map<String, Object> params = Map.of("emp_no", emp_no, "date", date);
 		return session.selectList(NS + "selectMonthlyAttendanceByEmpNo", params);
 	}
 
