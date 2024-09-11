@@ -146,8 +146,8 @@ $(document).ready(function() {
             //신청자
              {"data" : null,
              	"render": function(data){
-             		return "<span data-bs-toggle='modal' data-bs-target='#kt_modal_add_schedule'>"+data.bk_name+"</span>";
-//						return data.bk_name
+//             		return "<span data-bs-toggle='modal' data-bs-target='#kt_modal_add_schedule'>"+data.bk_name+"</span>";
+						return data.bk_name
              		}
              },
              
@@ -164,8 +164,8 @@ $(document).ready(function() {
                     } else {
                         state = '반려';
                     }
-                    return "<span data-bs-toggle='modal' data-bs-target='#kt_modal_add_schedule'>"+state+"</span>";
-//					return state;
+//                    return "<span data-bs-toggle='modal' data-bs-target='#kt_modal_add_schedule'>"+state+"</span>";
+					return state;
                 }
             },
 			
